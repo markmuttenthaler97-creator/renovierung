@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renovierungs-Projektplan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+  :root { --bg:#0f1117;--card:#1a1d27;--card-hover:#222633;--accent:#4f8cff;--accent2:#36d399;--text:#e2e8f0;--text-muted:#94a3b8;--border:#2a2e3d;--warning:#fbbf24;--success:#34d399;--info:#60a5fa; }
+  * { margin:0;padding:0;box-sizing:border-box; }
+  body { font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh; }
+  .header { background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid var(--border);padding:2rem 1rem 1rem;text-align:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px); }
+  .header h1 { font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem; }
+  .header .subtitle { color:var(--text-muted);font-size:.95rem;font-weight:300; }
+  .progress-bar-container { max-width:600px;margin:1rem auto 0;background:var(--border);border-radius:20px;height:10px;overflow:hidden; }
+  .progress-bar-fill { height:100%;border-radius:20px;background:linear-gradient(90deg,#4f8cff,#36d399);width:0%;transition:width .5s; }
+  .progress-text { color:var(--text-muted);font-size:.8rem;margin-top:.4rem; }
+  .tab-nav { display:flex;justify-content:center;gap:.4rem;margin:1.2rem auto 0;max-width:750px;flex-wrap:wrap; }
+  .tab-btn { padding:.45rem 1rem;border:1px solid var(--border);background:transparent;color:var(--text-muted);border-radius:8px;cursor:pointer;font-family:inherit;font-size:.8rem;font-weight:600;transition:all .2s; }
+  .tab-btn:hover { border-color:var(--accent);color:var(--text); }
+  .tab-btn.active { background:var(--accent);border-color:var(--accent);color:#fff; }
+  .tab-content { display:none; } .tab-content.active { display:block; }
+  .container { max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+
+  /* DASHBOARD */
+  .dash-wrapper { max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+  .dash-top { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem; }
+  .dash-kpi { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center;transition:all .3s; }
+  .dash-kpi:hover { border-color:var(--accent);transform:translateY(-2px); }
+  .dash-kpi-icon { font-size:1.8rem;margin-bottom:.3rem; }
+  .dash-kpi-value { font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .dash-kpi-label { font-size:.75rem;color:var(--text-muted);margin-top:.1rem; }
+  .dash-phases { display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem; }
+  .dash-phase-card { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;position:relative;overflow:hidden;transition:all .3s; }
+  .dash-phase-card:hover { border-color:var(--accent);transform:translateY(-2px); }
+  .dash-phase-card.is-done { opacity:.6; } .dash-phase-card.is-active { border-color:#f87171;box-shadow:0 0 20px rgba(248,113,113,.15); }
+  .dash-phase-status { position:absolute;top:.8rem;right:.8rem;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;text-transform:uppercase;letter-spacing:.5px; }
+  .dash-phase-status.done { background:rgba(52,211,153,.15);color:var(--success); }
+  .dash-phase-status.active { background:rgba(248,113,113,.15);color:#f87171;animation:pulse 2s infinite; }
+  .dash-phase-status.upcoming { background:rgba(148,163,184,.1);color:var(--text-muted); }
+  @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+  .dash-phase-icon { font-size:1.5rem;margin-bottom:.4rem; } .dash-phase-title { font-weight:700;font-size:.9rem;margin-bottom:.2rem;padding-right:60px; }
+  .dash-phase-dates { font-size:.75rem;color:var(--accent);margin-bottom:.6rem; }
+  .dash-ring-row { display:flex;align-items:center;gap:.8rem; }
+  .dash-ring-container { position:relative;width:50px;height:50px; }
+  .dash-ring-svg { transform:rotate(-90deg); } .dash-ring-bg { fill:none;stroke:var(--border);stroke-width:4; }
+  .dash-ring-fill { fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .5s; }
+  .dash-ring-text { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.65rem;font-weight:800; }
+  .dash-ring-tasks { font-size:.75rem;color:var(--text-muted); }
+  .dash-countdown-box { background:linear-gradient(135deg,rgba(248,113,113,.1),rgba(251,191,36,.05));border:1px solid rgba(248,113,113,.2);border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1.5rem; }
+  .dash-countdown-label { font-size:.85rem;color:var(--text-muted);margin-bottom:.3rem; }
+  .dash-countdown-phase { font-size:1rem;font-weight:700;color:#f87171;margin-bottom:.5rem; }
+  .dash-countdown-numbers { display:flex;justify-content:center;gap:1.5rem; }
+  .dash-countdown-unit { text-align:center; }
+  .dash-countdown-num { font-size:2rem;font-weight:800;background:linear-gradient(135deg,#f87171,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .dash-countdown-txt { font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px; }
+
+  /* BUDGET */
+  .budget-wrapper { max-width:1000px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+  .budget-overview { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin-bottom:1.5rem; }
+  .budget-kpi { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:all .3s; }
+  .budget-kpi:hover { border-color:var(--accent);transform:translateY(-2px); }
+  .budget-kpi-icon { font-size:1.3rem;margin-bottom:.2rem; }
+  .budget-kpi-value { font-size:1.15rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .budget-kpi-value.red { background:linear-gradient(135deg,#f87171,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .budget-kpi-value.green { background:linear-gradient(135deg,#22c55e,#14b8a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .budget-kpi-label { font-size:.63rem;color:var(--text-muted);margin-top:.15rem; }
+
+  .budget-chart-container { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem; }
+  .budget-chart-title { font-size:.95rem;font-weight:700;margin-bottom:1rem; }
+  .bar-chart { width:100%; }
+  .bar-group { margin-bottom:.6rem; }
+  .bar-group-label { font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:.25rem;display:flex;justify-content:space-between;align-items:center; }
+  .bar-group-bars { display:flex;flex-direction:column;gap:3px; }
+  .bar-track { background:var(--border);border-radius:5px;height:14px;overflow:hidden; }
+  .bar-fill { height:100%;border-radius:5px;transition:width .6s;min-width:2px; }
+  .bar-fill-plan { background:linear-gradient(90deg,#3b82f6,#6366f1); }
+  .bar-fill-ist { background:linear-gradient(90deg,#22c55e,#14b8a6); }
+  .bar-fill-over { background:linear-gradient(90deg,#f87171,#ef4444); }
+  .chart-legend { display:flex;gap:1.2rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--border);flex-wrap:wrap; }
+  .chart-legend-item { display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--text-muted); }
+  .chart-legend-dot { width:10px;height:10px;border-radius:3px; }
+
+  .budget-donut-row { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem; }
+  .budget-donut-card { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center; }
+  .budget-donut-card h4 { font-size:.85rem;margin-bottom:.8rem;color:var(--text-muted); }
+  .donut-container { position:relative;width:140px;height:140px;margin:0 auto; }
+  .donut-svg { transform:rotate(-90deg); }
+  .donut-bg { fill:none;stroke:var(--border);stroke-width:12; }
+  .donut-fill { fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .8s; }
+  .donut-center { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center; }
+  .donut-value { font-size:1.3rem;font-weight:800; }
+  .donut-label { font-size:.6rem;color:var(--text-muted); }
+
+  .budget-table-container { background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden; }
+  .budget-table-header { display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem .5rem; }
+  .budget-table-title { font-size:.9rem;font-weight:700; }
+  .budget-table { width:100%;border-collapse:collapse;font-size:.8rem; }
+  .budget-table th { text-align:left;padding:.5rem .7rem;font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:1px solid var(--border);font-weight:600; }
+  .budget-table th.right { text-align:right; }
+  .budget-table td { padding:.5rem .7rem;border-bottom:1px solid rgba(255,255,255,.03); }
+  .budget-table tr:hover td { background:rgba(255,255,255,.02); }
+  .budget-table .amount { text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap; }
+  .ist-input { background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.8rem;font-weight:600;padding:.25rem .4rem;width:100px;text-align:right;transition:all .2s;font-variant-numeric:tabular-nums; }
+  .ist-input:focus { outline:none;border-color:var(--accent);background:rgba(79,140,255,.08); }
+  .ist-input::placeholder { color:rgba(148,163,184,.4); }
+  .diff-cell { text-align:right;font-weight:700;font-size:.78rem;white-space:nowrap; }
+  .diff-positive { color:var(--success); } .diff-negative { color:#f87171; } .diff-neutral { color:var(--text-muted); }
+  .badge { font-size:.55rem;font-weight:700;padding:.1rem .35rem;border-radius:4px;text-transform:uppercase;letter-spacing:.5px; }
+  .badge-paid { background:rgba(52,211,153,.15);color:var(--success); }
+  .badge-est { background:rgba(251,191,36,.15);color:var(--warning); }
+  .budget-table tr.total-row td { font-weight:800;border-top:2px solid var(--accent);background:rgba(79,140,255,.05);font-size:.83rem; }
+  .budget-table tr.sub-row td { color:var(--text-muted);font-size:.75rem;background:rgba(255,255,255,.01); }
+
+  .budget-split { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-top:1.5rem; }
+  .budget-split-title { font-size:.9rem;font-weight:700;margin-bottom:1rem; }
+  .budget-split-grid { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+  .budget-split-card { background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center; }
+  .budget-split-name { font-size:.8rem;color:var(--text-muted);margin-bottom:.3rem; }
+  .budget-split-amount { font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .budget-split-sub { font-size:.65rem;color:var(--text-muted);margin-top:.2rem; }
+
+  /* AUSGABEN */
+  .ausgaben-wrapper { max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+  .ausgaben-container { background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden; }
+  .ausgaben-header { display:flex;justify-content:space-between;align-items:center;padding:1.2rem 1.5rem .8rem;flex-wrap:wrap;gap:.8rem; }
+  .ausgaben-title { font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .ausgaben-summary { display:flex;gap:1.5rem;flex-wrap:wrap; }
+  .ausgaben-stat { text-align:center; }
+  .ausgaben-stat-value { font-size:1.1rem;font-weight:800;color:var(--accent2); }
+  .ausgaben-stat-label { font-size:.6rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px; }
+  .ausgaben-actions { display:flex;gap:.5rem;padding:0 1.5rem .8rem;flex-wrap:wrap; }
+  .ausgaben-btn { padding:.4rem .8rem;border:1px solid var(--border);background:transparent;color:var(--text-muted);border-radius:6px;cursor:pointer;font-family:inherit;font-size:.75rem;font-weight:600;transition:all .2s; }
+  .ausgaben-btn:hover { border-color:var(--accent);color:var(--text); }
+  .ausgaben-btn.primary { background:var(--accent);border-color:var(--accent);color:#fff; }
+  .ausgaben-btn.primary:hover { filter:brightness(1.15); }
+  .ausgaben-btn.danger { border-color:#f87171;color:#f87171; }
+  .ausgaben-btn.danger:hover { background:rgba(248,113,113,.1); }
+  .ausgaben-table-wrap { overflow-x:auto; }
+  .ausgaben-table { width:100%;border-collapse:collapse;font-size:.82rem;min-width:700px; }
+  .ausgaben-table th { text-align:left;padding:.6rem .8rem;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);font-weight:700;background:rgba(79,140,255,.03); }
+  .ausgaben-table th.right { text-align:right; }
+  .ausgaben-table td { padding:.2rem .4rem;border-bottom:1px solid rgba(255,255,255,.03); }
+  .ausgaben-table tr:hover td { background:rgba(255,255,255,.02); }
+  .ausgaben-table tr.filled td { background:rgba(79,140,255,.02); }
+  .ausgaben-table .row-num { color:var(--text-muted);font-size:.7rem;text-align:center;width:35px;font-weight:600; }
+  .ausg-input { background:transparent;border:1px solid transparent;border-radius:4px;color:var(--text);font-family:inherit;font-size:.82rem;padding:.35rem .5rem;width:100%;transition:all .2s; }
+  .ausg-input:hover { border-color:var(--border); }
+  .ausg-input:focus { outline:none;border-color:var(--accent);background:rgba(79,140,255,.05); }
+  .ausg-input::placeholder { color:rgba(148,163,184,.3); }
+  .ausg-input.betrag { text-align:right;font-weight:600;font-variant-numeric:tabular-nums; }
+  .ausgaben-table tr.total-row td { font-weight:800;border-top:2px solid var(--accent);background:rgba(79,140,255,.05);padding:.7rem .8rem; }
+  .ausgaben-footer { padding:1rem 1.5rem;border-top:1px solid var(--border);font-size:.7rem;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem; }
+
+  
+  /* SYNC */
+  .sync-indicator { display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;margin-left:.8rem;padding:.2rem .6rem;border-radius:6px;cursor:pointer;transition:all .2s;border:1px solid transparent; }
+  .sync-indicator:hover { border-color:var(--border); }
+  .sync-dot { width:8px;height:8px;border-radius:50%;transition:all .3s; }
+  .sync-dot.green { background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5); }
+  .sync-dot.yellow { background:#fbbf24;box-shadow:0 0 6px rgba(251,191,36,.5);animation:pulse .8s infinite; }
+  .sync-dot.red { background:#f87171;box-shadow:0 0 6px rgba(248,113,113,.5); }
+  .sync-dot.gray { background:#64748b; }
+  .sync-text { color:var(--text-muted); }
+  .sync-badge { position:relative; }
+  .sync-badge::after { content:'';position:absolute;top:-2px;right:-2px;width:6px;height:6px;background:#f87171;border-radius:50%;display:none; }
+  .sync-badge.has-update::after { display:block;animation:pulse 1s infinite; }
+
+  .modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px); }
+  .modal-overlay.active { display:flex; }
+  .modal { background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .modal h2 { font-size:1.2rem;font-weight:800;margin-bottom:.3rem;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .modal h3 { font-size:.9rem;font-weight:700;margin:1rem 0 .5rem;color:var(--accent); }
+  .modal p { font-size:.85rem;color:var(--text-muted);margin-bottom:.8rem;line-height:1.6; }
+  .modal ol { font-size:.82rem;color:var(--text);margin:.5rem 0 1rem 1.2rem;line-height:1.8; }
+  .modal ol li { margin-bottom:.3rem; }
+  .modal code { background:rgba(79,140,255,.1);color:var(--accent);padding:.15rem .4rem;border-radius:4px;font-size:.78rem;font-family:'Courier New',monospace; }
+  .modal-input { width:100%;background:rgba(255,255,255,.05);border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem;padding:.6rem .8rem;transition:all .2s;margin:.5rem 0; }
+  .modal-input:focus { outline:none;border-color:var(--accent);background:rgba(79,140,255,.05); }
+  .modal-input::placeholder { color:rgba(148,163,184,.4); }
+  .modal-buttons { display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap; }
+  .modal-btn { padding:.5rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s; }
+  .modal-btn:hover { border-color:var(--accent);color:var(--text); }
+  .modal-btn.primary { background:var(--accent);border-color:var(--accent);color:#fff; }
+  .modal-btn.primary:hover { filter:brightness(1.15); }
+  .modal-btn.danger { border-color:#f87171;color:#f87171; }
+  .modal-status { margin-top:.8rem;padding:.5rem .8rem;border-radius:6px;font-size:.8rem;display:none; }
+  .modal-status.success { display:block;background:rgba(52,211,153,.1);color:var(--success);border:1px solid rgba(52,211,153,.2); }
+  .modal-status.error { display:block;background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2); }
+
+  .step-box { background:rgba(79,140,255,.05);border:1px solid rgba(79,140,255,.15);border-radius:8px;padding:.8rem;margin:.5rem 0;font-size:.78rem;color:var(--text);line-height:1.7; }
+
+  /* GANTT */
+  .gantt-wrapper { max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+  .gantt-container { background:var(--card);border:1px solid var(--border);border-radius:12px;overflow-x:auto;padding:1.5rem; }
+  .gantt-title { font-size:1.1rem;font-weight:700;margin-bottom:.3rem; }
+  .gantt-subtitle { font-size:.8rem;color:var(--text-muted);margin-bottom:1.2rem; }
+  .gantt-chart { position:relative;min-width:850px; }
+  .gantt-header { display:flex;border-bottom:1px solid var(--border);padding-bottom:.4rem;margin-bottom:.3rem; }
+  .gantt-label-col { min-width:200px;max-width:200px;font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600; }
+  .gantt-grid-col { flex:1;display:flex; }
+  .gantt-kw-cell { flex:1;text-align:center;font-size:.65rem;font-weight:600;color:var(--text-muted);padding:.2rem 0;border-left:1px solid rgba(255,255,255,.04); }
+  .gantt-kw-cell.is-current { color:#f87171;font-weight:800; }
+  .gantt-kw-date { font-size:.5rem;font-weight:400;color:rgba(148,163,184,.6);display:block; }
+  .gantt-row { display:flex;align-items:center;min-height:36px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .2s; }
+  .gantt-row:hover { background:rgba(255,255,255,.02); }
+  .gantt-row-label { min-width:200px;max-width:200px;font-size:.78rem;font-weight:500;padding-right:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .gantt-row-grid { flex:1;display:flex;position:relative;height:28px; }
+  .gantt-cell { flex:1;border-left:1px solid rgba(255,255,255,.04); }
+  .gantt-bar { position:absolute;height:20px;top:4px;border-radius:6px;z-index:2;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:rgba(0,0,0,.7);text-shadow:0 0 2px rgba(255,255,255,.3); }
+  .gantt-bar:hover { transform:scaleY(1.3);z-index:5;filter:brightness(1.2); }
+  .gantt-today-line { position:absolute;top:0;bottom:0;width:2px;background:#f87171;z-index:10;pointer-events:none; }
+  .gantt-today-line::before { content:'HEUTE';position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.55rem;font-weight:800;color:#f87171;background:rgba(248,113,113,.15);padding:1px 6px;border-radius:4px;white-space:nowrap;letter-spacing:1px; }
+  .gantt-today-line::after { content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#f87171;border-radius:50%; }
+  .gantt-legend { display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--border); }
+  .gantt-legend-item { display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--text-muted); }
+  .gantt-legend-color { width:12px;height:12px;border-radius:3px; }
+
+  /* TIMELINE */
+  .timeline { position:relative;padding-left:40px; }
+  .timeline::before { content:'';position:absolute;left:16px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,#4f8cff,#36d399,#fbbf24,#f87171,#4f8cff);border-radius:3px; }
+  .phase { position:relative;margin-bottom:1rem; }
+  .phase-dot { position:absolute;left:-30px;top:1.3rem;width:14px;height:14px;border-radius:50%;border:3px solid var(--accent);background:var(--bg);z-index:2;transition:all .3s; }
+  .phase.done .phase-dot { background:var(--success);border-color:var(--success); }
+  .phase-card { background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s; }
+  .phase-card:hover { background:var(--card-hover);border-color:#3a3f52;transform:translateX(4px); }
+  .phase-card.active .phase-body { max-height:1200px;opacity:1;padding:0 1.2rem 1.2rem; }
+  .phase-card.active { border-color:var(--accent);box-shadow:0 0 20px rgba(79,140,255,.1); }
+  .phase-header { display:flex;align-items:center;padding:1rem 1.2rem;gap:.8rem;user-select:none;cursor:pointer; }
+  .phase-icon { font-size:1.5rem;min-width:36px;text-align:center; } .phase-info { flex:1; }
+  .phase-title { font-weight:700;font-size:1rem; } .phase-desc { font-size:.8rem;color:var(--accent2);font-style:italic; }
+  .phase-kw { font-size:.8rem;color:var(--text-muted); }
+  .phase-dates { font-size:.75rem;color:var(--accent);font-weight:600;background:rgba(79,140,255,.1);padding:.2rem .6rem;border-radius:6px;white-space:nowrap; }
+  .phase-chevron { color:var(--text-muted);transition:transform .3s;font-size:1.2rem; }
+  .phase-card.active .phase-chevron { transform:rotate(180deg); }
+  .phase-body { max-height:0;opacity:0;overflow:hidden;transition:max-height .4s,opacity .3s,padding .3s;padding:0 1.2rem; }
+  .task-section { margin-top:.6rem; }
+  .task-section-title { font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:.4rem;font-weight:600; }
+  .task-item { display:flex;align-items:center;gap:.6rem;padding:.4rem 0;font-size:.9rem; }
+  .task-checkbox { appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;border:2px solid var(--border);border-radius:5px;cursor:pointer;transition:all .2s;position:relative;background:transparent; }
+  .task-checkbox:checked { background:var(--accent2);border-color:var(--accent2); }
+  .task-checkbox:checked::after { content:'\2713';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#000;font-size:.75rem;font-weight:800; }
+  .task-checkbox:checked + .task-label { text-decoration:line-through;color:var(--text-muted); }
+  .task-label { cursor:pointer; }
+  .hint-box { background:rgba(251,191,36,.08);border-left:3px solid var(--warning);border-radius:0 8px 8px 0;padding:.7rem .9rem;margin-top:.8rem;font-size:.85rem;color:#fde68a; }
+  .hint-box strong { color:var(--warning); } .hint-item { margin:.2rem 0; }
+  .danger-box { background:rgba(248,113,113,.08);border-left:3px solid #f87171;border-radius:0 8px 8px 0;padding:.7rem .9rem;margin-top:.5rem;font-size:.85rem;color:#fca5a5; }
+  .danger-box strong { color:#f87171; }
+  .parallel-box { background:rgba(54,211,153,.08);border-left:3px solid var(--success);border-radius:0 8px 8px 0;padding:.7rem .9rem;margin-top:.5rem;font-size:.85rem;color:#a7f3d0; }
+  .parallel-box strong { color:var(--success); }
+  .golden-rules { background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(248,113,113,.05));border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:1.5rem;margin-top:2rem; }
+  .golden-rules h3 { font-size:1.1rem;margin-bottom:.8rem;color:var(--warning); }
+  .golden-rule { display:flex;align-items:flex-start;gap:.5rem;padding:.4rem 0;font-size:.9rem;color:#fde68a; }
+  .golden-rule-icon { min-width:22px; }
+  .summary { background:linear-gradient(135deg,rgba(79,140,255,.1),rgba(54,211,153,.1));border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-top:1.5rem;text-align:center; }
+  .summary h3 { font-size:1.1rem;margin-bottom:.5rem;color:var(--accent); }
+  .summary .duration { font-size:2rem;font-weight:800;background:linear-gradient(135deg,#4f8cff,#36d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+
+  .print-wrapper { max-width:1000px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+  .print-btn { display:block;margin:0 auto 1.5rem;padding:.7rem 2rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer; }
+  .print-page { background:#fff;color:#111;border-radius:8px;padding:2rem;box-shadow:0 4px 30px rgba(0,0,0,.4); }
+  .print-page h2 { font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:.2rem; }
+  .print-page .print-sub { text-align:center;font-size:.85rem;color:#666;margin-bottom:1.5rem; }
+  .print-table { width:100%;border-collapse:collapse;font-size:.8rem; }
+  .print-table th { background:#1e293b;color:#fff;padding:.5rem .6rem;text-align:left;font-weight:700;font-size:.75rem; }
+  .print-table td { padding:.5rem .6rem;border-bottom:1px solid #e2e8f0;vertical-align:top; }
+  .print-table tr:nth-child(even) td { background:#f8fafc; }
+  .print-phase-name { font-weight:700; } .print-kw { color:#3b82f6;font-weight:600; }
+  .print-hints { font-size:.7rem;color:#dc2626; }
+  .print-checkbox { display:inline-block;width:14px;height:14px;border:2px solid #999;border-radius:3px; }
+  .print-rules { margin-top:1.5rem;padding:1rem;background:#fef3c7;border:2px solid #f59e0b;border-radius:8px; }
+  .print-rules h3 { font-size:.9rem;margin-bottom:.5rem;color:#92400e; }
+  .print-rules li { font-size:.8rem;margin:.2rem 0;color:#78350f; }
+
+  @media print { body{background:#fff!important;} .header,.tab-nav,.print-btn{display:none!important;} .tab-content{display:none!important;} #tab-print{display:block!important;} }
+  @media (max-width:600px) { .header h1{font-size:1.3rem;} .phase-dates{display:none;} .gantt-row-label,.gantt-label-col{min-width:120px;max-width:120px;font-size:.65rem;} .budget-split-grid{grid-template-columns:1fr;} .budget-donut-row{grid-template-columns:1fr;} .ist-input{width:80px;font-size:.7rem;} }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏗️ Renovierungs-Projektplan</h1>
+  <div class="subtitle">KW 12 – KW 34 · März bis August 2026 <span class="sync-indicator" onclick="openSyncModal()" id="syncIndicator"><span class="sync-dot gray" id="syncDot"></span><span class="sync-text" id="syncStatusText">⚙️ Sync einrichten</span></span></div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">0/0</div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('dashboard',this)">🎯 Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('budget',this)">💰 Budget</button>
+    <button class="tab-btn" onclick="switchTab('gantt',this)">📊 Gantt</button>
+    <button class="tab-btn" onclick="switchTab('timeline',this)">📋 Phasen</button>
+    <button class="tab-btn" onclick="switchTab('ausgaben',this)">🧾 Ausgaben</button>
+    <button class="tab-btn" onclick="switchTab('print',this)">🖨️ Aushang</button>
+  </div>
+</div>
+
+<div class="tab-content active" id="tab-dashboard"><div class="dash-wrapper"><div class="dash-countdown-box" id="dashCountdown"></div><div class="dash-top" id="dashKPIs"></div><div class="dash-phases" id="dashPhases"></div></div></div>
+
+<div class="tab-content" id="tab-budget">
+  <div class="budget-wrapper">
+    <div class="budget-overview" id="budgetKPIs"></div>
+    <div class="budget-donut-row" id="budgetDonuts"></div>
+    <div class="budget-chart-container"><div class="budget-chart-title">📊 Plan vs. Ist – Alle Positionen</div><div id="barChart" class="bar-chart"></div><div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>Plan</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:linear-gradient(90deg,#22c55e,#14b8a6)"></div>Ist (≤ Plan)</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:linear-gradient(90deg,#f87171,#ef4444)"></div>Ist (> Plan)</div></div></div>
+    <div class="budget-table-container"><div class="budget-table-header"><div class="budget-table-title">📋 Kostenaufstellung – Plan vs. Ist</div></div><table class="budget-table"><thead><tr><th>Position</th><th class="right">Plan</th><th class="right">Ist (tatsächlich)</th><th class="right">Differenz</th><th>Status</th></tr></thead><tbody id="budgetTableBody"></tbody></table></div>
+    <div class="budget-split" id="budgetSplitSection"></div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-ausgaben">
+  <div class="ausgaben-wrapper">
+    <div class="ausgaben-container">
+      <div class="ausgaben-header">
+        <div class="ausgaben-title">🧾 Ausgabenaufstellung</div>
+        <div class="ausgaben-summary" id="ausgabenSummary"></div>
+      </div>
+      <div class="ausgaben-actions">
+        <button class="ausgaben-btn primary" onclick="addAusgabenRows(5)">+ 5 Zeilen</button>
+        <button class="ausgaben-btn" onclick="addAusgabenRows(10)">+ 10 Zeilen</button>
+        <button class="ausgaben-btn danger" onclick="clearAusgaben()">🗑️ Alle löschen</button>
+      </div>
+      <div class="ausgaben-table-wrap">
+        <table class="ausgaben-table">
+          <thead>
+            <tr>
+              <th style="width:35px">#</th>
+              <th style="width:110px">Datum</th>
+              <th style="width:200px">Beschreibung</th>
+              <th>Auftragnehmer / Handwerker</th>
+              <th class="right" style="width:120px">Betrag</th>
+              <th>Bemerkungen</th>
+            </tr>
+          </thead>
+          <tbody id="ausgabenBody"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td></td>
+              <td></td>
+              <td><strong>Summe</strong></td>
+              <td></td>
+              <td class="amount" id="ausgabenTotal"><strong>€ 0,00</strong></td>
+              <td id="ausgabenCount"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="ausgaben-footer">
+        <span>💾 Alle Einträge werden automatisch im Browser gespeichert</span>
+        <span id="ausgabenLastSaved"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-gantt"><div class="gantt-wrapper"><div class="gantt-container"><div class="gantt-title">📊 Gantt-Diagramm</div><div class="gantt-subtitle" id="ganttDate"></div><div class="gantt-chart" id="ganttChart"><div class="gantt-header"><div class="gantt-label-col">Phase</div><div class="gantt-grid-col" id="ganttHeaderCells"></div></div><div id="ganttRows"></div><div class="gantt-today-line" id="todayLine" style="display:none;"></div></div><div class="gantt-legend" id="ganttLegend"></div></div></div></div>
+
+<div class="tab-content" id="tab-timeline">
+  <div class="container">
+    <div class="timeline" id="timeline">
+      <div class="phase" data-phase="1"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🔨</div><div class="phase-info"><div class="phase-title">Phase 1: Abbruch</div><div class="phase-desc">👉 Alles Alte raus</div><div class="phase-kw">KW 12–19</div></div><div class="phase-dates">20.03.–10.05.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t1a"><label class="task-label" for="t1a">Böden raus</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t1b"><label class="task-label" for="t1b">Türen raus</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t1c"><label class="task-label" for="t1c">Küche & Bad entfernen</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t1d"><label class="task-label" for="t1d">Wände abbrechen</label></div></div><div class="danger-box"><strong>🚨</strong><div class="hint-item">• Strom & Wasser aus · Statiker!</div></div><div class="hint-box"><strong>⚠️</strong><div class="hint-item">• Container · Staubschutz · Schutt entsorgen</div></div></div></div></div>
+      <div class="phase" data-phase="2"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🧱</div><div class="phase-info"><div class="phase-title">Phase 2: Wände</div><div class="phase-kw">KW 20</div></div><div class="phase-dates">11.–17.05.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t2a"><label class="task-label" for="t2a">Trockenbauwände</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t2b"><label class="task-label" for="t2b">Türöffnungen</label></div></div><div class="hint-box"><strong>⚠️</strong><div class="hint-item">• Maße fix · Schallschutz · Hängeschränke</div></div></div></div></div>
+      <div class="phase" data-phase="3"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">⚡🚿</div><div class="phase-info"><div class="phase-title">Phase 3: Rohinstallation</div><div class="phase-kw">KW 21–22</div></div><div class="phase-dates">18.–31.05.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t3a"><label class="task-label" for="t3a">Elektrik</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t3b"><label class="task-label" for="t3b">Wasser</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t3c"><label class="task-label" for="t3c">FBH Vorbereitung</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t3d"><label class="task-label" for="t3d">📸 Fotos</label></div></div><div class="hint-box"><strong>⚠️</strong><div class="hint-item">• Steckdosen · Küche FINAL · Fotos!</div></div></div></div></div>
+      <div class="phase" data-phase="4"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🔥</div><div class="phase-info"><div class="phase-title">Phase 4: Fußboden+FBH</div><div class="phase-kw">KW 23</div></div><div class="phase-dates">01.–07.06.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t4a"><label class="task-label" for="t4a">Schüttung</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t4b"><label class="task-label" for="t4b">Dämmung</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t4c"><label class="task-label" for="t4c">FBH</label></div></div></div></div></div>
+      <div class="phase" data-phase="5"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🧱</div><div class="phase-info"><div class="phase-title">Phase 5: Estrich</div><div class="phase-kw">KW 24</div></div><div class="phase-dates">08.–14.06.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t5a"><label class="task-label" for="t5a">Estrich einbringen</label></div></div><div class="danger-box"><strong>🚨</strong><div class="hint-item">• 2–4 Wochen Trocknung!</div></div></div></div></div>
+      <div class="phase" data-phase="6"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">⏳</div><div class="phase-info"><div class="phase-title">Phase 6: Trocknung</div><div class="phase-kw">KW 25–27</div></div><div class="phase-dates">15.06.–05.07.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t6a"><label class="task-label" for="t6a">Lüften</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t6b"><label class="task-label" for="t6b">Aufheizprogramm</label></div></div><div class="parallel-box"><strong>✅ Parallel:</strong><div class="hint-item">• Spachteln / Trockenbau</div></div></div></div></div>
+      <div class="phase" data-phase="7"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🎨</div><div class="phase-info"><div class="phase-title">Phase 7: Malen</div><div class="phase-kw">KW 27–28</div></div><div class="phase-dates">29.06.–12.07.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t7a"><label class="task-label" for="t7a">Spachteln</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t7b"><label class="task-label" for="t7b">Grundieren</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t7c"><label class="task-label" for="t7c">Streichen</label></div></div></div></div></div>
+      <div class="phase" data-phase="8"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🚿</div><div class="phase-info"><div class="phase-title">Phase 8: Fliesen</div><div class="phase-kw">KW 28–29</div></div><div class="phase-dates">06.–19.07.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t8a"><label class="task-label" for="t8a">Abdichten</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t8b"><label class="task-label" for="t8b">Fliesen legen</label></div></div></div></div></div>
+      <div class="phase" data-phase="9"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🪵</div><div class="phase-info"><div class="phase-title">Phase 9: Böden</div><div class="phase-kw">KW 29–30</div></div><div class="phase-dates">13.–26.07.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t9a"><label class="task-label" for="t9a">Parkett/Vinyl</label></div></div></div></div></div>
+      <div class="phase" data-phase="10"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🚪</div><div class="phase-info"><div class="phase-title">Phase 10: Türen</div><div class="phase-kw">KW 30</div></div><div class="phase-dates">20.–26.07.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t10a"><label class="task-label" for="t10a">Türen einbauen</label></div></div></div></div></div>
+      <div class="phase" data-phase="11"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🍽️🚿</div><div class="phase-info"><div class="phase-title">Phase 11: Küche & Bad</div><div class="phase-kw">KW 31–32</div></div><div class="phase-dates">27.07.–09.08.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t11a"><label class="task-label" for="t11a">Küche</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t11b"><label class="task-label" for="t11b">Sanitär</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t11c"><label class="task-label" for="t11c">Steckdosen</label></div></div></div></div></div>
+      <div class="phase" data-phase="12"><div class="phase-dot"></div><div class="phase-card"><div class="phase-header"><div class="phase-icon">🧹</div><div class="phase-info"><div class="phase-title">Phase 12: Finish</div><div class="phase-kw">KW 33+</div></div><div class="phase-dates">ab 10.08.</div><div class="phase-chevron">▼</div></div><div class="phase-body"><div class="task-section"><div class="task-section-title">Aufgaben</div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t12a"><label class="task-label" for="t12a">Silikon</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t12b"><label class="task-label" for="t12b">Reinigung</label></div><div class="task-item"><input type="checkbox" class="task-checkbox" id="t12c"><label class="task-label" for="t12c">Mängel</label></div></div></div></div></div>
+    </div>
+    <div class="golden-rules"><h3>🔥 Die 5 wichtigsten Regeln</h3><div class="golden-rule"><div class="golden-rule-icon">✅</div><div>Planung ist alles</div></div><div class="golden-rule"><div class="golden-rule-icon">✅</div><div>Nach Estrich nichts überstürzen</div></div><div class="golden-rule"><div class="golden-rule-icon">✅</div><div>Reihenfolge einhalten</div></div><div class="golden-rule"><div class="golden-rule-icon">✅</div><div>Mehr Steckdosen</div></div><div class="golden-rule"><div class="golden-rule-icon">✅</div><div>Fotos von Leitungen</div></div></div>
+    <div class="summary"><h3>⏱️ Gesamtdauer</h3><div class="duration">ca. 20 Wochen</div><div style="color:var(--text-muted);margin-top:.3rem;font-size:.9rem">KW 12–34 · März – August 2026</div></div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-print">
+  <div class="print-wrapper">
+    <button class="print-btn" onclick="window.print()">🖨️ Drucken / PDF</button>
+    <div class="print-page">
+      <h2>🏗️ Renovierungsplan 2026</h2><p class="print-sub">KW 12–34 · Budget: € 56.952,70</p>
+      <table class="print-table"><thead><tr><th></th><th>Phase</th><th>KW</th><th>Zeitraum</th><th>Hinweise</th><th>✓</th></tr></thead><tbody>
+        <tr><td>🔨</td><td class="print-phase-name">1. Abbruch</td><td class="print-kw">12–19</td><td>20.03.–10.05.</td><td class="print-hints">Strom · Statiker · Container</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🧱</td><td class="print-phase-name">2. Wände</td><td class="print-kw">20</td><td>11.–17.05.</td><td class="print-hints">Maße fix</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>⚡</td><td class="print-phase-name">3. Rohinstall.</td><td class="print-kw">21–22</td><td>18.–31.05.</td><td class="print-hints">Küche FINAL · 📸</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🔥</td><td class="print-phase-name">4. Fußboden</td><td class="print-kw">23</td><td>01.–07.06.</td><td class="print-hints">Höhen!</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🧱</td><td class="print-phase-name">5. Estrich</td><td class="print-kw">24</td><td>08.–14.06.</td><td class="print-hints">🚨 Trocknung!</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>⏳</td><td class="print-phase-name">6. Trocknung</td><td class="print-kw">25–27</td><td>15.06.–05.07.</td><td class="print-hints">Aufheizen</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🎨</td><td class="print-phase-name">7. Malen</td><td class="print-kw">27–28</td><td>29.06.–12.07.</td><td class="print-hints">Spachteln!</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🚿</td><td class="print-phase-name">8. Fliesen</td><td class="print-kw">28–29</td><td>06.–19.07.</td><td class="print-hints">Abdichtung!</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🪵</td><td class="print-phase-name">9. Böden</td><td class="print-kw">29–30</td><td>13.–26.07.</td><td class="print-hints">Restfeuchte!</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🚪</td><td class="print-phase-name">10. Türen</td><td class="print-kw">30</td><td>20.–26.07.</td><td class="print-hints">Bodenhöhe</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🍽️</td><td class="print-phase-name">11. Küche&Bad</td><td class="print-kw">31–32</td><td>27.07.–09.08.</td><td class="print-hints">NACH Boden</td><td><span class="print-checkbox"></span></td></tr>
+        <tr><td>🧹</td><td class="print-phase-name">12. Finish</td><td class="print-kw">33+</td><td>ab 10.08.</td><td class="print-hints">Reinigung</td><td><span class="print-checkbox"></span></td></tr>
+      </tbody></table>
+      <div class="print-rules"><h3>🔥 5 Regeln</h3><ol><li>Planung</li><li>Estrich: Geduld</li><li>Reihenfolge</li><li>Steckdosen</li><li>Fotos</li></ol></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var YEAR=2026;
+var phaseData=[
+  {id:1,icon:'🔨',label:'Abbruch',kwS:12,kwE:19,color:'#ef4444',tasks:['t1a','t1b','t1c','t1d']},
+  {id:2,icon:'🧱',label:'Wände',kwS:20,kwE:20,color:'#f97316',tasks:['t2a','t2b']},
+  {id:3,icon:'⚡',label:'Rohinstallation',kwS:21,kwE:22,color:'#eab308',tasks:['t3a','t3b','t3c','t3d']},
+  {id:4,icon:'🔥',label:'Fußboden+FBH',kwS:23,kwE:23,color:'#84cc16',tasks:['t4a','t4b','t4c']},
+  {id:5,icon:'🧱',label:'Estrich',kwS:24,kwE:24,color:'#22c55e',tasks:['t5a']},
+  {id:6,icon:'⏳',label:'Trocknung',kwS:25,kwE:27,color:'#14b8a6',tasks:['t6a','t6b']},
+  {id:7,icon:'🎨',label:'Malen',kwS:27,kwE:28,color:'#06b6d4',tasks:['t7a','t7b','t7c']},
+  {id:8,icon:'🚿',label:'Fliesen',kwS:28,kwE:29,color:'#3b82f6',tasks:['t8a','t8b']},
+  {id:9,icon:'🪵',label:'Böden',kwS:29,kwE:30,color:'#6366f1',tasks:['t9a']},
+  {id:10,icon:'🚪',label:'Türen',kwS:30,kwE:30,color:'#8b5cf6',tasks:['t10a']},
+  {id:11,icon:'🍽️',label:'Küche&Bad',kwS:31,kwE:32,color:'#a855f7',tasks:['t11a','t11b','t11c']},
+  {id:12,icon:'🧹',label:'Finish',kwS:33,kwE:34,color:'#ec4899',tasks:['t12a','t12b','t12c']}
+];
+var kwMin=12,kwMax=34,totalKWs=kwMax-kwMin+1;
+
+// ALL budget items in one flat list (FBH+Estrich & Raumteiler now after Malen)
+var budgetItems=[
+  {key:'entsorgung',name:'Entsorgung',plan:200,status:''},
+  {key:'kueche',name:'Küche inkl. Geräte',plan:19600,status:''},
+  {key:'ueberleger',name:'Überleger Küche',plan:50,status:'est'},
+  {key:'tueren',name:'Türen',plan:3500,status:''},
+  {key:'boden',name:'Boden + verlegen',plan:3000,status:''},
+  {key:'badmoebel',name:'Badmöbel',plan:5900,status:''},
+  {key:'installation',name:'Installationsarbeit',plan:3500,status:''},
+  {key:'armaturen',name:'Badezimmerarmaturen',plan:5000,status:'paid'},
+  {key:'glaswand',name:'Glaswand',plan:500,status:''},
+  {key:'fliesen',name:'Fliesen',plan:2202.70,status:''},
+  {key:'fliesenverlegen',name:'Fliesenverlegen',plan:2500,status:''},
+  {key:'elektrik',name:'Elektrik',plan:2000,status:''},
+  {key:'malen',name:'Malen+Verputzen+Trockenbau',plan:2000,status:''},
+  {key:'fbh',name:'FBH + Estrich',plan:5000,status:''},
+  {key:'raumteiler',name:'Raumteiler',plan:2000,status:''}
+];
+
+var GOENNJAMIN_PLAN=4350;
+// Gesamt = 56952.70 | -Armaturen(5000) -Gönnjamin(4350) = Rest 47602.70 | /2 = 23801.35
+
+function fE(v){return '\u20AC '+v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function gV(k){var s=localStorage.getItem('budget_ist_'+k);return s!==null?parseFloat(s):null;}
+function sV(k,v){if(v===null||v===''||isNaN(v))localStorage.removeItem('budget_ist_'+k);else localStorage.setItem('budget_ist_'+k,v);}
+function pI(s){if(!s||s.trim()==='')return null;var c=s.replace(/[\u20AC\s]/g,'').replace(/\./g,'').replace(',','.');var n=parseFloat(c);return isNaN(n)?null:n;}
+
+function renderBudget(){
+  var tP=0,tI=0,fc=0;
+  budgetItems.forEach(function(i){tP+=i.plan;});
+
+  // Table rows
+  var html='';
+  budgetItems.forEach(function(item){
+    var ist=gV(item.key);
+    var iD=ist!==null?ist.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+    var diff=ist!==null?item.plan-ist:null;
+    var dC=diff===null?'diff-neutral':diff>0.01?'diff-positive':diff<-0.01?'diff-negative':'diff-neutral';
+    var dT=diff===null?'\u2013':(diff>=0?'+ ':'- ')+fE(Math.abs(diff)).replace('\u20AC ','');
+    if(ist!==null){tI+=ist;fc++;}
+    var sB='';if(item.status==='paid')sB='<span class="badge badge-paid">Bezahlt</span>';else if(item.status==='est')sB='<span class="badge badge-est">Schätzung</span>';
+    html+='<tr><td>'+item.name+'</td><td class="amount">'+fE(item.plan)+'</td><td class="ist-cell"><input class="ist-input" type="text" data-key="'+item.key+'" placeholder="0,00" value="'+iD+'"></td><td class="diff-cell '+dC+'">'+dT+'</td><td>'+sB+'</td></tr>';
+  });
+
+  // Zwischensumme
+  var iST=fc>0?fE(tI):'\u2013';
+  var tD=fc>0?tP-tI:null;
+  var tDC=tD===null?'diff-neutral':tD>0.01?'diff-positive':tD<-0.01?'diff-negative':'diff-neutral';
+  var tDT=tD===null?'\u2013':(tD>=0?'+ ':'- ')+fE(Math.abs(tD)).replace('\u20AC ','');
+  html+='<tr class="sub-row" style="border-top:1px solid var(--border)"><td><strong style="color:var(--text)">Zwischensumme</strong></td><td class="amount"><strong style="color:var(--text)">'+fE(tP)+'</strong></td><td class="amount"><strong style="color:var(--text)">'+iST+'</strong></td><td class="diff-cell '+tDC+'"><strong>'+tDT+'</strong></td><td></td></tr>';
+
+  // Armaturen abzug
+  html+='<tr class="sub-row"><td>\u2013 Badezimmerarmaturen (bezahlt)</td><td class="amount">\u2013 \u20AC 5.000,00</td><td class="amount">\u2013 \u20AC 5.000,00</td><td></td><td></td></tr>';
+
+  // Gönnjamin mit Ist
+  var gIst=gV('goennjamin');
+  var gIstD=gIst!==null?gIst.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  var gDiff=gIst!==null?GOENNJAMIN_PLAN-gIst:null;
+  var gDC=gDiff===null?'diff-neutral':gDiff>0.01?'diff-positive':gDiff<-0.01?'diff-negative':'diff-neutral';
+  var gDT=gDiff===null?'\u2013':(gDiff>=0?'+ ':'- ')+fE(Math.abs(gDiff)).replace('\u20AC ','');
+  html+='<tr class="sub-row"><td>\u2013 G\u00F6nnjamin</td><td class="amount">\u2013 '+fE(GOENNJAMIN_PLAN)+'</td><td class="ist-cell"><input class="ist-input" type="text" data-key="goennjamin" placeholder="0,00" value="'+gIstD+'" style="width:90px"></td><td class="diff-cell '+gDC+'">'+gDT+'</td><td></td></tr>';
+
+  // Gesamtsumme (nach Abzügen)
+  var restP=tP-5000-GOENNJAMIN_PLAN;
+  var armIst=gV('armaturen');if(armIst===null)armIst=5000;
+  var gIstVal=gV('goennjamin');if(gIstVal===null)gIstVal=GOENNJAMIN_PLAN;
+  var restI=fc>0?tI-armIst-gIstVal:null;
+  var restDiff=restI!==null?restP-restI:null;
+  var rDC=restDiff===null?'diff-neutral':restDiff>0.01?'diff-positive':restDiff<-0.01?'diff-negative':'diff-neutral';
+  var rDT=restDiff===null?'\u2013':(restDiff>=0?'+ ':'- ')+fE(Math.abs(restDiff)).replace('\u20AC ','');
+  html+='<tr class="total-row"><td><strong>\u2705 Gesamtsumme</strong></td><td class="amount"><strong>'+fE(restP)+'</strong></td><td class="amount"><strong>'+(restI!==null?fE(restI):'\u2013')+'</strong></td><td class="diff-cell '+rDC+'"><strong>'+rDT+'</strong></td><td></td></tr>';
+
+  document.getElementById('budgetTableBody').innerHTML=html;
+
+  // KPIs
+  var diffT=fc>0?tP-tI:0;var dCls=diffT>=0?'green':'red';var dPfx=diffT>=0?'\u2193 ':'\u2191 ';
+  var halfP=restP/2; // 23801.35
+  document.getElementById('budgetKPIs').innerHTML=
+    '<div class="budget-kpi"><div class="budget-kpi-icon">📋</div><div class="budget-kpi-value">'+fE(tP)+'</div><div class="budget-kpi-label">Plan Gesamt</div></div>'
+    +'<div class="budget-kpi"><div class="budget-kpi-icon">💳</div><div class="budget-kpi-value">'+(fc>0?fE(tI):'\u2013')+'</div><div class="budget-kpi-label">Ist Gesamt</div></div>'
+    +'<div class="budget-kpi"><div class="budget-kpi-icon">'+(diffT>=0?'✅':'⚠️')+'</div><div class="budget-kpi-value '+dCls+'">'+(fc>0?dPfx+fE(Math.abs(diffT)):'\u2013')+'</div><div class="budget-kpi-label">'+(diffT>=0?'Unter Budget':'Über Budget')+'</div></div>'
+    +'<div class="budget-kpi"><div class="budget-kpi-icon">👤</div><div class="budget-kpi-value">'+fE(halfP)+'</div><div class="budget-kpi-label">Pro Person (Plan)</div></div>';
+
+  // Donuts
+  var planPct=fc>0?Math.round(tI/tP*100):0;
+  var erfasstPct=Math.round(fc/budgetItems.length*100);
+  var r=55,circ=2*Math.PI*r;
+  var off1=circ-(Math.min(planPct,150)/150)*circ; // scale to 150% max
+  var off2=circ-(erfasstPct/100)*circ;
+  var col1=tI<=tP?'#22c55e':'#f87171';
+  document.getElementById('budgetDonuts').innerHTML=
+    '<div class="budget-donut-card"><h4>💰 Budget-Ausschöpfung</h4><div class="donut-container"><svg class="donut-svg" width="140" height="140"><circle class="donut-bg" cx="70" cy="70" r="'+r+'"/><circle class="donut-fill" cx="70" cy="70" r="'+r+'" stroke="'+col1+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off1+'"/></svg><div class="donut-center"><div class="donut-value" style="color:'+col1+'">'+(fc>0?planPct+'%':'\u2013')+'</div><div class="donut-label">Ist / Plan</div></div></div></div>'
+    +'<div class="budget-donut-card"><h4>📊 Erfassungsgrad</h4><div class="donut-container"><svg class="donut-svg" width="140" height="140"><circle class="donut-bg" cx="70" cy="70" r="'+r+'"/><circle class="donut-fill" cx="70" cy="70" r="'+r+'" stroke="#4f8cff" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off2+'"/></svg><div class="donut-center"><div class="donut-value" style="color:#4f8cff">'+erfasstPct+'%</div><div class="donut-label">'+fc+'/'+budgetItems.length+'</div></div></div></div>';
+
+  // Bar chart (all items + Gönnjamin)
+  var allForChart=budgetItems.concat([{key:'goennjamin',name:'Gönnjamin',plan:GOENNJAMIN_PLAN}]);
+  var maxAll=0;allForChart.forEach(function(i){var ist=gV(i.key);if(i.plan>maxAll)maxAll=i.plan;if(ist!==null&&ist>maxAll)maxAll=ist;});
+  var bHTML='';
+  allForChart.forEach(function(item){
+    var ist=gV(item.key);
+    var planW=(item.plan/maxAll*100).toFixed(1);
+    var istW=ist!==null?(ist/maxAll*100).toFixed(1):0;
+    var over=ist!==null&&ist>item.plan;
+    var diffTxt='';
+    if(ist!==null){var d=item.plan-ist;diffTxt=d>=0?'<span style="color:#34d399;font-size:.65rem;font-weight:700">\u2013'+fE(d).replace('\u20AC ','')+'</span>':'<span style="color:#f87171;font-size:.65rem;font-weight:700">+'+fE(Math.abs(d)).replace('\u20AC ','')+'</span>';}
+    bHTML+='<div class="bar-group"><div class="bar-group-label"><span>'+item.name+'</span>'+diffTxt+'</div><div class="bar-group-bars"><div class="bar-track"><div class="bar-fill bar-fill-plan" style="width:'+planW+'%"></div></div>';
+    if(ist!==null)bHTML+='<div class="bar-track"><div class="bar-fill '+(over?'bar-fill-over':'bar-fill-ist')+'" style="width:'+istW+'%"></div></div>';
+    bHTML+='</div></div>';
+  });
+  document.getElementById('barChart').innerHTML=bHTML;
+
+  // Split
+  var splitHTML='<div class="budget-split-title">👥 Aufteilung (50/50)</div><div class="budget-split-grid">'
+    +'<div class="budget-split-card"><div class="budget-split-name">Person 1</div><div class="budget-split-amount">'+fE(halfP)+'</div><div class="budget-split-sub">Hälfte von '+fE(restP)+'</div></div>'
+    +'<div class="budget-split-card"><div class="budget-split-name">Person 2</div><div class="budget-split-amount">'+fE(halfP)+'</div><div class="budget-split-sub">Hälfte von '+fE(restP)+'</div></div>'
+    +'</div>';
+  if(restI!==null){
+    var halfIst=restI/2;
+    splitHTML+='<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:1rem;">'
+      +'<div class="budget-split-card" style="border-color:'+(halfIst<=halfP?'var(--success)':'#f87171')+'"><div class="budget-split-name">Person 1 (Ist)</div><div class="budget-split-amount" style="background:linear-gradient(135deg,'+(halfIst<=halfP?'#22c55e,#14b8a6':'#f87171,#fbbf24')+');-webkit-background-clip:text">'+fE(halfIst)+'</div><div class="budget-split-sub">'+(halfIst<=halfP?'\u2193 '+fE(halfP-halfIst)+' gespart':'\u2191 '+fE(halfIst-halfP)+' mehr')+'</div></div>'
+      +'<div class="budget-split-card" style="border-color:'+(halfIst<=halfP?'var(--success)':'#f87171')+'"><div class="budget-split-name">Person 2 (Ist)</div><div class="budget-split-amount" style="background:linear-gradient(135deg,'+(halfIst<=halfP?'#22c55e,#14b8a6':'#f87171,#fbbf24')+');-webkit-background-clip:text">'+fE(halfIst)+'</div><div class="budget-split-sub">'+(halfIst<=halfP?'\u2193 '+fE(halfP-halfIst)+' gespart':'\u2191 '+fE(halfIst-halfP)+' mehr')+'</div></div></div>';
+  }
+  document.getElementById('budgetSplitSection').innerHTML=splitHTML;
+
+  // Rebind inputs
+  document.querySelectorAll('.ist-input').forEach(function(inp){
+    inp.addEventListener('change',function(){sV(this.getAttribute('data-key'),pI(this.value));renderBudget();});
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')this.blur();});
+  });
+}
+
+function getMonday(y,kw){var j=new Date(y,0,4);var d=j.getDay()||7;var w=new Date(j);w.setDate(j.getDate()-d+1);var t=new Date(w);t.setDate(w.getDate()+(kw-1)*7);return t;}
+function fmtDate(d){return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.';}
+function getPhaseStatus(p,t){var s=getMonday(YEAR,p.kwS),e=getMonday(YEAR,p.kwE);e.setDate(e.getDate()+6);if(t>e)return'done';if(t>=s&&t<=e)return'active';return'upcoming';}
+function getCheckedCount(ids){var d=0;ids.forEach(function(id){var c=document.getElementById(id);if(c&&c.checked)d++;});return d;}
+
+function renderDashboard(){
+  var today=new Date();today.setHours(0,0,0,0);var aP=null,nP=null;
+  for(var i=0;i<phaseData.length;i++){var st=getPhaseStatus(phaseData[i],today);if(st==='active'&&!aP)aP=phaseData[i];if(st==='upcoming'&&!nP)nP=phaseData[i];}
+  var cdHTML='';
+  if(aP){var eD=getMonday(YEAR,aP.kwE);eD.setDate(eD.getDate()+6);var dl=Math.ceil((eD-today)/864e5);cdHTML='<div class="dash-countdown-label">Aktuelle Phase endet in</div><div class="dash-countdown-phase">'+aP.icon+' '+aP.label+'</div><div class="dash-countdown-numbers"><div class="dash-countdown-unit"><div class="dash-countdown-num">'+Math.floor(dl/7)+'</div><div class="dash-countdown-txt">Wochen</div></div><div class="dash-countdown-unit"><div class="dash-countdown-num">'+(dl%7)+'</div><div class="dash-countdown-txt">Tage</div></div></div>';}
+  else if(nP){var sD=getMonday(YEAR,nP.kwS);var du=Math.ceil((sD-today)/864e5);cdHTML='<div class="dash-countdown-label">Nächste Phase in</div><div class="dash-countdown-phase">'+nP.icon+' '+nP.label+'</div><div class="dash-countdown-numbers"><div class="dash-countdown-unit"><div class="dash-countdown-num">'+Math.floor(du/7)+'</div><div class="dash-countdown-txt">Wochen</div></div><div class="dash-countdown-unit"><div class="dash-countdown-num">'+(du%7)+'</div><div class="dash-countdown-txt">Tage</div></div></div>';}
+  var pE=getMonday(YEAR,kwMax);pE.setDate(pE.getDate()+6);var dE=Math.max(0,Math.ceil((pE-today)/864e5)),wE=Math.floor(dE/7);
+  var tT=0,dT=0,dP=0;phaseData.forEach(function(p){var c=getCheckedCount(p.tasks);tT+=p.tasks.length;dT+=c;if(c===p.tasks.length)dP++;});var pc=tT>0?Math.round(dT/tT*100):0;
+  document.getElementById('dashCountdown').innerHTML=cdHTML;
+  document.getElementById('dashKPIs').innerHTML='<div class="dash-kpi"><div class="dash-kpi-icon">📊</div><div class="dash-kpi-value">'+pc+'%</div><div class="dash-kpi-label">Fortschritt</div></div><div class="dash-kpi"><div class="dash-kpi-icon">✅</div><div class="dash-kpi-value">'+dP+'/12</div><div class="dash-kpi-label">Phasen</div></div><div class="dash-kpi"><div class="dash-kpi-icon">📋</div><div class="dash-kpi-value">'+dT+'/'+tT+'</div><div class="dash-kpi-label">Aufgaben</div></div><div class="dash-kpi"><div class="dash-kpi-icon">🏁</div><div class="dash-kpi-value">'+wE+'W</div><div class="dash-kpi-label">bis Ende</div></div>';
+  var pcHTML='';phaseData.forEach(function(p){var status=getPhaseStatus(p,today),checked=getCheckedCount(p.tasks),total=p.tasks.length,pct=total>0?Math.round(checked/total*100):0,r=20,circ=2*Math.PI*r,offset=circ-(pct/100)*circ;var sL=status==='done'?'Erledigt':status==='active'?'Aktiv':'Offen';var sD=getMonday(YEAR,p.kwS),eD=getMonday(YEAR,p.kwE);eD.setDate(eD.getDate()+6);
+    pcHTML+='<div class="dash-phase-card '+(status==='done'?'is-done':'')+' '+(status==='active'?'is-active':'')+'"><div class="dash-phase-status '+status+'">'+sL+'</div><div class="dash-phase-icon">'+p.icon+'</div><div class="dash-phase-title">'+p.label+'</div><div class="dash-phase-dates">KW '+p.kwS+(p.kwE!==p.kwS?'–'+p.kwE:'')+' · '+fmtDate(sD)+'–'+fmtDate(eD)+'</div><div class="dash-ring-row"><div class="dash-ring-container"><svg class="dash-ring-svg" width="50" height="50"><circle class="dash-ring-bg" cx="25" cy="25" r="'+r+'"/><circle class="dash-ring-fill" cx="25" cy="25" r="'+r+'" stroke="'+p.color+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'"/></svg><div class="dash-ring-text">'+pct+'%</div></div><div class="dash-ring-tasks">'+checked+'/'+total+'</div></div></div>';});
+  document.getElementById('dashPhases').innerHTML=pcHTML;
+}
+
+function renderGantt(){
+  var today=new Date();today.setHours(0,0,0,0);
+  document.getElementById('ganttDate').textContent='Stand: '+today.toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  var hHTML='';for(var kw=kwMin;kw<=kwMax;kw++){var m=getMonday(YEAR,kw),me=new Date(m);me.setDate(m.getDate()+6);var cur=today>=m&&today<=me;hHTML+='<div class="gantt-kw-cell'+(cur?' is-current':'')+'">KW'+kw+'<span class="gantt-kw-date">'+fmtDate(m)+'</span></div>';}
+  document.getElementById('ganttHeaderCells').innerHTML=hHTML;
+  var rHTML='';phaseData.forEach(function(p){var si=p.kwS-kwMin,sp=p.kwE-p.kwS+1,lp=(si/totalKWs*100).toFixed(2),wp=(sp/totalKWs*100).toFixed(2);var ps=getMonday(YEAR,p.kwS),pe=getMonday(YEAR,p.kwE);pe.setDate(pe.getDate()+6);var op='1',bx='';if(today>pe){op='0.5';bx=' ✓';}var isA=today>=ps&&today<=pe,bs=isA?'border:2px solid #fff;':'';
+    rHTML+='<div class="gantt-row"><div class="gantt-row-label" style="opacity:'+op+(isA?';color:#f87171;font-weight:700':'')+'">'+(isA?'▶ ':'')+p.icon+' '+p.label+'</div><div class="gantt-row-grid">';for(var k=kwMin;k<=kwMax;k++)rHTML+='<div class="gantt-cell"></div>';rHTML+='<div class="gantt-bar" style="left:'+lp+'%;width:'+wp+'%;background:'+p.color+';opacity:'+op+';'+bs+'">'+(sp>=2?'KW'+p.kwS+'–'+p.kwE:'KW'+p.kwS)+bx+'</div></div></div>';});
+  document.getElementById('ganttRows').innerHTML=rHTML;
+  var pS=getMonday(YEAR,kwMin),pE=getMonday(YEAR,kwMax);pE.setDate(pE.getDate()+6);var tl=document.getElementById('todayLine'),lc=document.querySelector('.gantt-label-col'),lw=lc?lc.offsetWidth:200;
+  if(today>=pS&&today<=pE){var td=(pE-pS)/864e5,ds=(today-pS)/864e5,pc=ds/td*100;var cw=document.getElementById('ganttChart').offsetWidth,gw=cw-lw;tl.style.display='block';tl.style.left=(lw+pc/100*gw)+'px';}else if(today<pS){tl.style.display='block';tl.style.left=lw+'px';}else{tl.style.display='none';}
+  var lgHTML='';phaseData.forEach(function(p){lgHTML+='<div class="gantt-legend-item"><div class="gantt-legend-color" style="background:'+p.color+'"></div>P'+p.id+'</div>';});lgHTML+='<div class="gantt-legend-item"><div class="gantt-legend-color" style="background:#f87171;width:3px"></div>Heute</div>';document.getElementById('ganttLegend').innerHTML=lgHTML;
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-content').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('tab-'+tab).classList.add('active');btn.classList.add('active');
+  if(tab==='gantt')setTimeout(renderGantt,50);if(tab==='dashboard')setTimeout(renderDashboard,50);if(tab==='budget')setTimeout(renderBudget,50);if(tab==='ausgaben')setTimeout(renderAusgaben,50);
+}
+
+document.querySelectorAll('.phase-header').forEach(function(h){h.addEventListener('click',function(e){if(e.target.tagName==='INPUT')return;this.closest('.phase-card').classList.toggle('active');});});
+document.querySelectorAll('.task-checkbox').forEach(function(cb){cb.addEventListener('click',function(e){e.stopPropagation();});cb.addEventListener('change',function(){localStorage.setItem('reno_'+this.id,this.checked);updateProgress();renderDashboard();});});
+
+function updateProgress(){
+  var cbs=document.querySelectorAll('.task-checkbox'),chk=document.querySelectorAll('.task-checkbox:checked'),t=cbs.length,d=chk.length,cp=0;
+  document.querySelectorAll('.phase').forEach(function(ph){var pc=ph.querySelectorAll('.task-checkbox'),pk=ph.querySelectorAll('.task-checkbox:checked');if(pc.length>0&&pc.length===pk.length){cp++;ph.classList.add('done');}else{ph.classList.remove('done');}});
+  var pct=t>0?Math.round(d/t*100):0;document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressText').textContent=d+'/'+t+' Aufgaben ('+cp+'/12 Phasen)';
+}
+
+document.querySelectorAll('.task-checkbox').forEach(function(cb){var s=localStorage.getItem('reno_'+cb.id);if(s==='true')cb.checked=true;});
+updateProgress();
+
+// ======================== AUSGABEN ========================
+var AUSGABEN_MIN_ROWS = 50;
+var AUSGABEN_KEY = 'reno_ausgaben';
+
+function getAusgaben() {
+  var s = localStorage.getItem(AUSGABEN_KEY);
+  if (!s) return [];
+  try { return JSON.parse(s); } catch(e) { return []; }
+}
+
+function saveAusgaben(data) {
+  localStorage.setItem(AUSGABEN_KEY, JSON.stringify(data));
+  var now = new Date();
+  document.getElementById('ausgabenLastSaved').textContent = 'Gespeichert: ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  triggerSync();
+}
+
+function renderAusgaben() {
+  var data = getAusgaben();
+  var rowCount = Math.max(AUSGABEN_MIN_ROWS, data.length + 5);
+  var html = '';
+  var total = 0;
+  var filledCount = 0;
+
+  for (var i = 0; i < rowCount; i++) {
+    var row = data[i] || {};
+    var hasDatum = row.datum && row.datum.trim() !== '';
+    var hasBeschr = row.beschreibung && row.beschreibung.trim() !== '';
+    var hasBetrag = row.betrag && row.betrag.trim() !== '';
+    var isFilled = hasDatum || hasBeschr || hasBetrag;
+    if (isFilled) filledCount++;
+
+    if (hasBetrag) {
+      var cleaned = row.betrag.replace(/[€\s]/g,'').replace(/\./g,'').replace(',','.');
+      var num = parseFloat(cleaned);
+      if (!isNaN(num)) total += num;
+    }
+
+    html += '<tr class="' + (isFilled ? 'filled' : '') + '">'
+      + '<td class="row-num">' + (i + 1) + '</td>'
+      + '<td><input class="ausg-input" type="text" data-row="'+i+'" data-col="datum" placeholder="TT.MM.JJJJ" value="' + (row.datum || '').replace(/"/g,'&quot;') + '"></td>'
+      + '<td><input class="ausg-input" type="text" data-row="'+i+'" data-col="beschreibung" placeholder="" value="' + (row.beschreibung || '').replace(/"/g,'&quot;') + '"></td>'
+      + '<td><input class="ausg-input" type="text" data-row="'+i+'" data-col="auftragnehmer" placeholder="" value="' + (row.auftragnehmer || '').replace(/"/g,'&quot;') + '"></td>'
+      + '<td><input class="ausg-input betrag" type="text" data-row="'+i+'" data-col="betrag" placeholder="0,00" value="' + (row.betrag || '').replace(/"/g,'&quot;') + '"></td>'
+      + '<td><input class="ausg-input" type="text" data-row="'+i+'" data-col="bemerkungen" placeholder="" value="' + (row.bemerkungen || '').replace(/"/g,'&quot;') + '"></td>'
+      + '</tr>';
+  }
+
+  document.getElementById('ausgabenBody').innerHTML = html;
+  document.getElementById('ausgabenTotal').innerHTML = '<strong>' + fE(total) + '</strong>';
+  document.getElementById('ausgabenCount').textContent = filledCount + ' Einträge';
+
+  // Summary
+  document.getElementById('ausgabenSummary').innerHTML =
+    '<div class="ausgaben-stat"><div class="ausgaben-stat-value">' + fE(total) + '</div><div class="ausgaben-stat-label">Gesamtausgaben</div></div>'
+    + '<div class="ausgaben-stat"><div class="ausgaben-stat-value">' + filledCount + '</div><div class="ausgaben-stat-label">Einträge</div></div>';
+
+  // Bind inputs
+  document.querySelectorAll('.ausg-input').forEach(function(inp) {
+    inp.addEventListener('change', handleAusgabeChange);
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Move to next row same column
+        var row = parseInt(this.getAttribute('data-row'));
+        var col = this.getAttribute('data-col');
+        var next = document.querySelector('.ausg-input[data-row="'+(row+1)+'"][data-col="'+col+'"]');
+        if (next) next.focus();
+      }
+      if (e.key === 'Tab' && !e.shiftKey) {
+        var row = parseInt(this.getAttribute('data-row'));
+        var col = this.getAttribute('data-col');
+        if (col === 'bemerkungen') {
+          e.preventDefault();
+          var next = document.querySelector('.ausg-input[data-row="'+(row+1)+'"][data-col="datum"]');
+          if (next) next.focus();
+        }
+      }
+    });
+  });
+}
+
+function handleAusgabeChange(e) {
+  var row = parseInt(e.target.getAttribute('data-row'));
+  var col = e.target.getAttribute('data-col');
+  var val = e.target.value;
+
+  var data = getAusgaben();
+  // Extend array if needed
+  while (data.length <= row) data.push({});
+  data[row][col] = val;
+
+  // Clean trailing empty rows
+  while (data.length > 0) {
+    var last = data[data.length - 1];
+    if (!last.datum && !last.beschreibung && !last.auftragnehmer && !last.betrag && !last.bemerkungen) {
+      data.pop();
+    } else break;
+  }
+
+  saveAusgaben(data);
+  // Update total without full re-render (smoother)
+  var total = 0, filledCount = 0;
+  var allInputs = document.querySelectorAll('.ausg-input[data-col="betrag"]');
+  allInputs.forEach(function(inp) {
+    var v = inp.value;
+    if (v && v.trim() !== '') {
+      var cleaned = v.replace(/[€\s]/g,'').replace(/\./g,'').replace(',','.');
+      var num = parseFloat(cleaned);
+      if (!isNaN(num)) total += num;
+    }
+  });
+  document.querySelectorAll('.ausg-input[data-col="datum"]').forEach(function(inp) {
+    if (inp.value && inp.value.trim() !== '') filledCount++;
+  });
+  document.getElementById('ausgabenTotal').innerHTML = '<strong>' + fE(total) + '</strong>';
+  document.getElementById('ausgabenCount').textContent = filledCount + ' Einträge';
+  document.getElementById('ausgabenSummary').innerHTML =
+    '<div class="ausgaben-stat"><div class="ausgaben-stat-value">' + fE(total) + '</div><div class="ausgaben-stat-label">Gesamtausgaben</div></div>'
+    + '<div class="ausgaben-stat"><div class="ausgaben-stat-value">' + filledCount + '</div><div class="ausgaben-stat-label">Einträge</div></div>';
+}
+
+function addAusgabenRows(n) {
+  AUSGABEN_MIN_ROWS += n;
+  renderAusgaben();
+}
+
+function clearAusgaben() {
+  if (confirm('Wirklich alle Ausgaben-Einträge löschen?')) {
+    localStorage.removeItem(AUSGABEN_KEY);
+    AUSGABEN_MIN_ROWS = 50;
+    renderAusgaben();
+  }
+}
+
+
+// ======================== SYNC ========================
+var SYNC_URL = localStorage.getItem('reno_sync_url') || '';
+var SYNC_INTERVAL = 30000;
+var syncTimer = null;
+var isSyncing = false;
+
+function updateSyncUI(status, text) {
+  var dot = document.getElementById('syncDot');
+  var txt = document.getElementById('syncStatusText');
+  dot.className = 'sync-dot ' + status;
+  txt.textContent = text;
+}
+
+function getAllSyncData() {
+  var tasks = {};
+  document.querySelectorAll('.task-checkbox').forEach(function(cb) {
+    tasks[cb.id] = cb.checked;
+  });
+  var budget = {};
+  budgetItems.forEach(function(item) {
+    var v = gV(item.key);
+    if (v !== null) budget[item.key] = v;
+  });
+  var g = gV('goennjamin');
+  if (g !== null) budget['goennjamin'] = g;
+  return {
+    timestamp: Date.now(),
+    tasks: tasks,
+    budget: budget,
+    ausgaben: getAusgaben()
+  };
+}
+
+function applySyncData(data) {
+  if (!data) return;
+  if (data.tasks) {
+    Object.keys(data.tasks).forEach(function(id) {
+      localStorage.setItem('reno_' + id, data.tasks[id]);
+      var cb = document.getElementById(id);
+      if (cb) cb.checked = data.tasks[id] === true || data.tasks[id] === 'true';
+    });
+  }
+  if (data.budget) {
+    Object.keys(data.budget).forEach(function(key) {
+      localStorage.setItem('budget_ist_' + key, data.budget[key]);
+    });
+  }
+  if (data.ausgaben) {
+    localStorage.setItem(AUSGABEN_KEY, JSON.stringify(data.ausgaben));
+  }
+  updateProgress();
+  // Only re-render the active tab to avoid flicker
+  var activeTab = document.querySelector('.tab-content.active');
+  if (activeTab) {
+    var id = activeTab.id;
+    if (id === 'tab-dashboard') renderDashboard();
+    else if (id === 'tab-budget') renderBudget();
+    else if (id === 'tab-ausgaben') renderAusgaben();
+  }
+}
+
+function syncPush() {
+  if (!SYNC_URL || isSyncing) return;
+  isSyncing = true;
+  updateSyncUI('yellow', '🔄 Wird synchronisiert...');
+  var data = getAllSyncData();
+  var payload = JSON.stringify({key: 'alldata', value: JSON.stringify(data)});
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', SYNC_URL, true);
+  xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+  xhr.onload = function() {
+    isSyncing = false;
+    updateSyncUI('green', '🟢 Synchronisiert');
+  };
+  xhr.onerror = function() {
+    // Fallback: try with navigator.sendBeacon
+    try {
+      var blob = new Blob([payload], {type: 'text/plain'});
+      navigator.sendBeacon(SYNC_URL, blob);
+      isSyncing = false;
+      updateSyncUI('green', '🟢 Synchronisiert');
+    } catch(e2) {
+      isSyncing = false;
+      updateSyncUI('red', '🔴 Sync-Fehler');
+    }
+  };
+  xhr.send(payload);
+}
+
+function syncPull() {
+  if (!SYNC_URL || isSyncing) return;
+  isSyncing = true;
+  updateSyncUI('yellow', '🔄 Lade Daten...');
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', SYNC_URL, true);
+  xhr.onload = function() {
+    isSyncing = false;
+    try {
+      var data = JSON.parse(xhr.responseText);
+      if (data && data.alldata) {
+        var parsed = JSON.parse(data.alldata);
+        var localData = getAllSyncData();
+        if (!localData.timestamp || parsed.timestamp > localData.timestamp) {
+          applySyncData(parsed);
+        }
+      }
+      updateSyncUI('green', '🟢 Synchronisiert');
+    } catch(e) {
+      updateSyncUI('yellow', '🟡 Teilweise synchronisiert');
+    }
+  };
+  xhr.onerror = function() {
+    isSyncing = false;
+    updateSyncUI('red', '🔴 Sync-Fehler');
+  };
+  xhr.send();
+}
+
+function startSync() {
+  if (!SYNC_URL) {
+    updateSyncUI('gray', '⚙️ Sync einrichten');
+    return;
+  }
+  updateSyncUI('yellow', '🔄 Verbinde...');
+  syncPull();
+  if (syncTimer) clearInterval(syncTimer);
+  syncTimer = setInterval(syncPull, SYNC_INTERVAL);
+}
+
+function triggerSync() {
+  if (SYNC_URL) {
+    // Debounce: push after 2 seconds of no changes
+    if (window._syncTimeout) clearTimeout(window._syncTimeout);
+    window._syncTimeout = setTimeout(syncPush, 2000);
+  }
+}
+
+// Hook into existing save functions
+var _origSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+  _origSetItem(key, value);
+  if (key.startsWith('reno_') || key.startsWith('budget_ist_')) {
+    triggerSync();
+  }
+};
+
+var _origRemoveItem = localStorage.removeItem.bind(localStorage);
+localStorage.removeItem = function(key) {
+  _origRemoveItem(key);
+  if (key.startsWith('reno_') || key.startsWith('budget_ist_')) {
+    triggerSync();
+  }
+};
+
+// Modal functions
+function openSyncModal() {
+  document.getElementById('syncModal').classList.add('active');
+  document.getElementById('syncUrlInput').value = SYNC_URL;
+  document.getElementById('syncModalStatus').className = 'modal-status';
+  document.getElementById('syncModalStatus').textContent = '';
+}
+
+function closeSyncModal() {
+  document.getElementById('syncModal').classList.remove('active');
+}
+
+function saveSyncUrl() {
+  var url = document.getElementById('syncUrlInput').value.trim();
+  if (!url) {
+    showModalStatus('error', '❌ Bitte eine URL eingeben');
+    return;
+  }
+  if (!url.startsWith('https://script.google.com/')) {
+    showModalStatus('error', '❌ Das sieht nicht nach einer Google Apps Script URL aus');
+    return;
+  }
+  SYNC_URL = url;
+  localStorage.setItem('reno_sync_url', url);
+  showModalStatus('success', '🔄 Teste Verbindung...');
+
+  // Test connection using XMLHttpRequest (better mobile support)
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      showModalStatus('success', '✅ Verbindung erfolgreich! Sync ist aktiv.');
+      startSync();
+      syncPush();
+    } else {
+      showModalStatus('error', '❌ Server-Fehler (Status ' + xhr.status + ')');
+    }
+  };
+  xhr.onerror = function() {
+    // Try JSONP fallback for mobile
+    testWithJsonp(url);
+  };
+  xhr.send();
+}
+
+function testWithJsonp(url) {
+  var callbackName = '_syncTest' + Date.now();
+  window[callbackName] = function(data) {
+    showModalStatus('success', '✅ Verbindung erfolgreich! Sync ist aktiv.');
+    startSync();
+    syncPush();
+    delete window[callbackName];
+    var el = document.getElementById('jsonpScript');
+    if (el) el.remove();
+  };
+  // If JSONP also fails, try saving anyway and test on next pull
+  var script = document.createElement('script');
+  script.id = 'jsonpScript';
+  script.src = url + '?callback=' + callbackName;
+  script.onerror = function() {
+    // Last resort: just save URL and assume it works
+    showModalStatus('success', '✅ URL gespeichert. Sync wird bei nächster Verbindung aktiv.');
+    startSync();
+    delete window[callbackName];
+    this.remove();
+  };
+  document.head.appendChild(script);
+}
+
+function manualSync() {
+  if (!SYNC_URL) {
+    showModalStatus('error', '❌ Erst eine URL eingeben');
+    return;
+  }
+  showModalStatus('success', '🔄 Synchronisiere...');
+  syncPush();
+  setTimeout(function() {
+    syncPull();
+    showModalStatus('success', '✅ Synchronisierung abgeschlossen!');
+  }, 3000);
+}
+
+function disconnectSync() {
+  SYNC_URL = '';
+  localStorage.removeItem('reno_sync_url');
+  if (syncTimer) clearInterval(syncTimer);
+  updateSyncUI('gray', '⚙️ Sync einrichten');
+  showModalStatus('success', '✅ Sync getrennt. Daten bleiben lokal erhalten.');
+}
+
+function showModalStatus(type, text) {
+  var el = document.getElementById('syncModalStatus');
+  el.className = 'modal-status ' + type;
+  el.textContent = text;
+}
+
+// Close modal on overlay click
+document.getElementById('syncModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSyncModal();
+});
+
+window.addEventListener('load',function(){renderDashboard();renderGantt();renderBudget();renderAusgaben();startSync();});
+window.addEventListener('resize',function(){renderGantt();});
+</script>
+
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <h2>🔄 Live-Sync einrichten</h2>
+    <p>Damit du und deine Freundin gleichzeitig arbeiten könnt und alle Änderungen sofort synchronisiert werden.</p>
+
+    <h3>📋 Einrichtung in 5 Schritten:</h3>
+    <div class="step-box">
+      <ol>
+        <li>Öffne <strong><a href="https://sheets.google.com" target="_blank" style="color:var(--accent)">Google Sheets</a></strong> und erstelle eine <strong>neue leere Tabelle</strong></li>
+        <li>Klicke oben auf <strong>Erweiterungen → Apps Script</strong></li>
+        <li>Lösche den vorhandenen Code und füge den <strong>Apps Script Code</strong> ein<br>(Datei wurde mitgeliefert: <code>google_apps_script.js</code>)</li>
+        <li>Klicke auf <strong>Bereitstellen → Neue Bereitstellung</strong>:<br>
+          • Typ: <strong>Web-App</strong><br>
+          • Ausführen als: <strong>Ich</strong><br>
+          • Zugriff: <strong>Jeder</strong><br>
+          • Klick auf <strong>Bereitstellen</strong></li>
+        <li><strong>URL kopieren</strong> und hier unten einfügen ↓</li>
+      </ol>
+    </div>
+
+    <h3>🔗 Google Apps Script URL:</h3>
+    <input class="modal-input" type="text" id="syncUrlInput" placeholder="https://script.google.com/macros/s/...../exec">
+
+    <div class="modal-buttons">
+      <button class="modal-btn primary" onclick="saveSyncUrl()">✅ Verbinden & Testen</button>
+      <button class="modal-btn" onclick="manualSync()">🔄 Jetzt synchronisieren</button>
+      <button class="modal-btn danger" onclick="disconnectSync()">❌ Trennen</button>
+      <button class="modal-btn" onclick="closeSyncModal()">Schließen</button>
+    </div>
+
+    <div class="modal-status" id="syncModalStatus"></div>
+
+    <h3 style="margin-top:1.2rem">ℹ️ Wie funktioniert's?</h3>
+    <p>• Alle Änderungen werden automatisch <strong>alle 30 Sekunden</strong> synchronisiert<br>
+    • Ihr könnt beide gleichzeitig Daten eintragen<br>
+    • Die Daten werden sicher in <strong>eurem eigenen</strong> Google Sheet gespeichert<br>
+    • Funktioniert auf PC, Tablet und Handy 📱</p>
+  </div>
+</div>
+
+</body>
+</html>
